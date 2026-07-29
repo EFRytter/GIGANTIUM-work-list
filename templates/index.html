@@ -4,11 +4,12 @@
     <title> Home page </title>
     </head>
     <body>
-        <h1>Home page!</h1>
-        {% for x in range(10) %}
-            {% if x % 2 == 1 %}
-                <p>{{x}}</p>
-            {% endif %}
-        {% endfor %}
+        <ul>
+            {% for d in day_list %}
+            <li><a href="/?day={{d}}">{{d}}</a></li>
+            {% endfor %}
+        </ul>
+        <p> Day: {{ day }} </p>
+        <p> Today: {{ today }} </p>
     </body>
 </html>
