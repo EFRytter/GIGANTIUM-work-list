@@ -1,15 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style>
+        .active-tab {
+            font-weight: bold;
+            background-color: lightblue;
+            border-top-left-radius:  15px;
+            border-top-right-radius:  15px;
+            border: 2px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 35px;
+            padding: 5px;
+            text-decoration: none;
+            color: black;
+            text-align: center;}
+        .day-tab {
+            background-color: lightblue;
+            border-top-left-radius:  15px;
+            border-top-right-radius:  15px;
+            border: 2px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 35px;
+            padding: 5px;
+            text-decoration: none;
+            color: black;
+            text-align: center;}
+        .left-arrow{
+            text-decoration: none;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            color: black;}
+        .right-arrow{
+            text-decoration: none;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            color: black;}
+
+        ul {
+            list-style-type: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            flex: 1;
+        }
+        
+        li {
+            flex: 1;
+        }
+
+        div {
+            display: flex;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;}
+    </style>
     <title> Home page </title>
     </head>
     <body>
-        <ul>
-            {% for d in day_list %}
-            <li><a href="/?day={{d}}">{{d}}</a></li>
-            {% endfor %}
-        </ul>
-        <p> Day: {{ day }} </p>
-        <p> Today: {{ today }} </p>
+        <div class = "center">
+            <p> Uge {{week_number}} </p>
+        </div>
+        
+        <div>
+            <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt;&lt;&lt;<br>Uge: {{week_number-1}} </a>
+            <ul>
+                {% for d in day_list %}
+                <li><a class="day-tab {% if d.english == day %}active-tab{% endif %}" href="/?day={{d.english}}&week={{week}}">{{d.danish}}<br>{{d.date}}</a></li>
+                {% endfor %}
+            </ul>
+            <a class = "right-arrow" href="/?week={{week+1}}&day={{day}}">&gt;&gt;&gt;<br>Uge: {{week_number+1}}</a>
+        </div>
     </body>
 </html>
