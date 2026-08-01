@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        input, textarea, select, button {
+        display: block;
+        margin-bottom: 10px;
+    }
+    </style>
+
+<title> Add task </title>
+    </head>
+    <body>
+        <form action="/add-task" method="POST" enctype="multipart/form-data">
+            <p>Tilføj en titel til opgaven*</p>
+            <input type="text" name="title" placeholder="Titel">
+
+            <p>Tilføj en dybere beskrivelse af opgaven*</p>
+            <textarea name="description" placeholder="Beskrivelse"></textarea>
+
+            <p>Tilføj et billede (valgfrit)</p>
+            <input type="file" name="image" accept="image/*">
+
+            <p>Vælg hvilket tidspunkt på dagen opgaven skal udføres*</p>
+            <select name="time_of_day">
+                <option value="morning">Morgen</option>
+                <option value="midday">Middag</option>
+                <option value="night">Aften</option>
+            </select>
+
+            <p>Vælg hvilken dag om ugen opgaven skal udføres*</p>
+            <select name="weekday">
+                <option value="Monday">Mandag</option>
+                <option value="Tuesday">Tirsdag</option>
+                <option value="Wednesday">Onsdag</option>
+                <option value="Thursday">Torsdag</option>
+                <option value="Friday">Fredag</option>
+                <option value="Saturday">Lørdag</option>
+                <option value="Sunday">Søndag</option>
+            </select>
+            <button type="submit">Gem opgave</button>
+        </form>
+    </body>
+</html>

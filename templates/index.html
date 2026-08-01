@@ -2,20 +2,6 @@
 <html>
 <head>
     <style>
-        .active-tab {
-            font-weight: bold;
-            background-color: lightblue;
-            border-top-left-radius:  15px;
-            border-top-right-radius:  15px;
-            border: 2px solid black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 35px;
-            padding: 5px;
-            text-decoration: none;
-            color: black;
-            text-align: center;}
         .day-tab {
             background-color: lightblue;
             border-top-left-radius:  15px;
@@ -29,6 +15,25 @@
             text-decoration: none;
             color: black;
             text-align: center;}
+
+        .active-tab {
+            font-weight: bold;
+            background-color: lightblue;
+            border-top-left-radius:  15px;
+            border-top-right-radius:  15px;
+            border: 2px solid black;
+            border-bottom: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 35px;
+            padding: 5px;
+            text-decoration: none;
+            color: black;
+            text-align: center;
+            position: relative;
+            top: 2px;}
+        
         .left-arrow{
             text-decoration: none;
             text-align: center;
@@ -50,13 +55,15 @@
             margin: 0;
             padding: 0;
             flex: 1;
+            gap: 1px;
         }
         
         li {
             flex: 1;
+            
         }
 
-        div {
+        .tab-bar {
             display: flex;
         }
 
@@ -64,15 +71,51 @@
             display: flex;
             justify-content: center;
             align-items: center;}
+        
+        .worklist {
+            border: 2px solid black;
+            height: 500px;
+            background-color: lightblue;
+            margin-top: -2px;
+        }
+        .add-task {
+            border: 2px solid black;
+            text-decoration: none;
+            color: black;
+        }
+
+        .task-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+    
+        }
+
+        .tick-checkbox {
+            display: none;
+            
+        }
+        .tick-mark {
+            font-size: 24px;
+            color: grey;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .tick-checkbox:checked + .tick-mark {
+            color: green;
+        }
+        
     </style>
     <title> Home page </title>
     </head>
     <body>
+        <a class ="add-task" href="/add-task">Tilføj opgave</a>
+
         <div class = "center">
             <p> Uge {{week_number}} </p>
         </div>
         
-        <div>
+        <div class="tab-bar">
             <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt;&lt;&lt;<br>Uge: {{week_number-1}} </a>
             <ul>
                 {% for d in day_list %}
@@ -80,6 +123,38 @@
                 {% endfor %}
             </ul>
             <a class = "right-arrow" href="/?week={{week+1}}&day={{day}}">&gt;&gt;&gt;<br>Uge: {{week_number+1}}</a>
+        </div>
+
+        <div class="worklist">
+            <p>Morgenopgaver</p>
+            
+            {% for task in tasks %}
+                {% if task.weekday == day and task.time_of_day == "morning" %}
+                <div class="task-row">
+                    <label class="tick-label">
+                        <input type="checkbox" class="tick-checkbox">
+                        <span class="tick-mark">✓</span>
+                    </label>
+                    <p>{{ task.title }} - {{ task.description }}</p>
+                </div>    
+                {% endif %}
+            {% endfor %}
+            
+
+            <p>Middagsopgave</p>
+            {% for task in tasks %}
+                {% if task.weekday == day and task.time_of_day == "midday" %}
+                    <p>{{ task.title }} - {{ task.description }}</p>
+                {% endif %}
+            {% endfor %}
+
+            <p>Aftenopgaver</p>
+            {% for task in tasks %}
+                {% if task.weekday == day and task.time_of_day == "night" %}
+                    <p>{{ task.title }} - {{ task.description }}</p>
+                {% endif %}
+            {% endfor %}
+
         </div>
     </body>
 </html>
