@@ -32,11 +32,9 @@
     input,textarea,option {
         text-align: center;
     }
-
     textarea {
         height: 100px;
     }
-
     p {
         background-color: lightblue;
         border-radius: 5px;
@@ -75,39 +73,34 @@
         <a class="tilbage" href="/"> Tilbage </a>
 
         <div class="form-container">
-        <form action="/add-task" method="POST" enctype="multipart/form-data" id="add-task-form">
+        <form action="/edit-task/{{task.id}}" method="POST" enctype="multipart/form-data" id="edit-task-form">
             {% if error %}
             <div class="warning-message">{{ error }}</div>
             {% endif %}
 
             <p>Tilføj en titel til opgaven*</p>
-            <input type="text" name="title" placeholder="Titel" data-required="true" required>
+            <input type="text" name="title" placeholder="Titel" value="{{ task.title }}" data-required="true" required>
          
             <p>Tilføj en dybere beskrivelse af opgaven*</p>
-            <textarea name="description" placeholder="Beskrivelse" data-required="true" required></textarea>
-
-            <p>Tilføj et billede (valgfrit)</p>
-            <input type="file" name="image" accept="image/*">
+            <textarea name="description" placeholder="Beskrivelse" data-required="true" required>{{task.description}}</textarea>
 
             <p>Vælg hvilket tidspunkt på dagen opgaven skal udføres*</p>
             <select name="time_of_day" data-required="true" required>
-                <option value="">Vælg tidspunkt</option>
-                <option value="morning">Morgen</option>
-                <option value="midday">Middag</option>
-                <option value="night">Aften</option>
+                <option value="morning" {% if task.time_of_day == "morning" %}selected{% endif %}>Morgen</option>
+                <option value="midday" {% if task.time_of_day == "midday" %}selected{% endif %}>Middag</option>
+                <option value="night" {% if task.time_of_day == "night" %}selected{% endif %}>Aften</option>
             </select>
 
             <p>Vælg hvilken dag om ugen opgaven skal udføres*</p>
             <div class="day-select-row" id="weekday-container">
                 <select name="weekday" data-required="true" required>
-                    <option value="">Vælg dag</option>
-                    <option value="Monday">Mandag</option>
-                    <option value="Tuesday">Tirsdag</option>
-                    <option value="Wednesday">Onsdag</option>
-                    <option value="Thursday">Torsdag</option>
-                    <option value="Friday">Fredag</option>
-                    <option value="Saturday">Lørdag</option>
-                    <option value="Sunday">Søndag</option>
+                    <option value="Monday" {% if task.weekday == "Monday" %}selected{% endif %}>Mandag</option>
+                    <option value="Tuesday" {% if task.weekday == "Tuesday" %}selected{% endif %}>Tirsdag</option>
+                    <option value="Wednesday" {% if task.weekday == "Wednesday" %}selected{% endif %}>Onsdag</option>
+                    <option value="Thursday" {% if task.weekday == "Thursday" %}selected{% endif %}>Torsdag</option>
+                    <option value="Friday" {% if task.weekday == "Friday" %}selected{% endif %}>Fredag</option>
+                    <option value="Saturday" {% if task.weekday == "Saturday" %}selected{% endif %}>Lørdag</option>
+                    <option value="Sunday" {% if task.weekday == "Sunday" %}selected{% endif %}>Søndag</option>
                 </select>
             </div>
             <button type="button" class="extra-day-btn" id="add-day-button">+ vælg ekstra dag opgaven skal udføres</button>
@@ -150,7 +143,7 @@
 
             document.getElementById('add-day-button').addEventListener('click', addDaySelect);
 
-            document.getElementById('add-task-form').addEventListener('submit', function(event) {
+            document.getElementById('edit-task-form').addEventListener('submit', function(event) {
                 const requiredFields = this.querySelectorAll('[data-required="true"]');
                 let missing = false;
 

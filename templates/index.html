@@ -33,6 +33,10 @@
             text-align: center;
             position: relative;
             top: 2px;}
+
+        .today-tab {
+            color: blue !important;
+        }
         
         .left-arrow{
             text-decoration: none;
@@ -71,91 +75,529 @@
             display: flex;
             justify-content: center;
             align-items: center;}
+
+        .week-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+            min-height: 32px;
+        }
+
+        .week-header p {
+            margin: 0;
+        }
+
+        .back-to-current-week {
+            position: absolute;
+            right: 25%;
+            top: 50%;
+            transform: translateY(-50%);
+            text-decoration: none;
+            color: black;
+            border: 1px solid black;
+            border-radius: 6px;
+            padding: 4px 10px;
+            background-color: white;
+            font-size: 14px;
+        }
         
         .worklist {
             border: 2px solid black;
             height: 500px;
-            background-color: white;
             margin-top: -2px;
         }
         .add-task {
-            border: 2px solid black;
             text-decoration: none;
             color: black;
+        }
+        .info-popup{
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            margin-left: auto;
+        }
+
+        .info-checkbox {
+            display: none;
+        }
+        .info-text{
+            background: white;
+            border: 1px solid black;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .info-overlay{
+            position: fixed;
+            display: none;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+        }
+        .info-checkbox:checked ~ .info-overlay {
+            display: block;
+        }
+        .info-box{
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background-color: white;
+            border: 1px solid black;
+            padding: 5px;
+        }
+        .info-checkbox:checked ~ .info-box {
+            display: flex;
         }
 
         .task-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background-color: lightgreen;
-    
+            gap: 20px;
+            margin-top: 1px;
+        }
+
+        .task-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 1px;
+            flex: 1;
+            padding: 2px 4px;
+            border-radius: 6px;
+        }
+
+        .task-row p {
+            margin: 0;
         }
 
         .tick-checkbox {
-            display: none;
-            
+            display: flex; 
         }
-        .tick-mark {
-            font-size: 24px;
-            color: grey;
-            cursor: pointer;
-            margin-left: 10px;
+
+        .locked-task {
+            position: relative;
+            opacity: 0.65;
+            filter: grayscale(1);
+            overflow: hidden;
         }
-        .tick-checkbox:checked + .tick-mark {
-            color: green;
+
+        .locked-task::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(180, 180, 180, 0.22);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .locked-task .task-card,
+        .locked-task .info-popup,
+        .locked-task .initial-label,
+        .locked-task .tick-checkbox,
+        .locked-task .completed-task-checkbox {
+            pointer-events: none;
         }
         
+
+        
+        .menu-toggle {
+            display: none;
+        }
+        .hamburger-icon {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .hamburger-icon span {
+            width: 30px;
+            height: 4px;
+            background: black;
+            border-radius: 2px;
+        }
+        .side-menu {
+            display: none;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 25%;
+            background: white;
+            border: 2px solid black;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+        .menu-toggle:checked ~ .side-menu {
+            display: flex;
+        }
+
+        .dagsopgave {
+            background-color: lightblue;
+            text-align: center;
+        }
+
+        .udførte-opgaver {
+            background-color: lightgrey;
+            text-align: center;
+        }
+
+        .used-today-box {
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .used-today-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .used-today-row .employee-btn {
+            flex: 0 1 auto;
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .employee-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .employee-letter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .employee-btn {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            flex: 0 1 auto;
+        }
+
+        .employee-used-today {
+            font-weight: bold;
+            background-color: #90EE90;
+            
+        }
+
+        .completed-task-row {
+            background-color: lightgrey;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .completed-task-row p {
+            margin: 0;
+        }
+
+        .udførte-opgaver {
+            background-color: lightgrey;
+            text-align: center;
+        }
+
+        .initial-label {
+            position: fixed;
+            display: none;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+        }
+        .tick-checkbox:checked ~ .initial-label{
+            display: block;
+        }
+        .initial-input-row {
+            flex:1;
+        }
+        .initial-box{
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background-color: white;
+            border: 1px solid black;
+            padding: 12px;
+            width: 400px;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .initial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .tick-checkbox:checked ~ .initial-box{
+            display: block;
+        }
+
     </style>
     <title> Home page </title>
     </head>
     <body>
-        <a class ="add-task" href="/add-task">Tilføj opgave</a>
+        <script>
+            function handleAddEmployee(event, taskId) {
+                event.preventDefault();
+                const form = document.getElementById(`employee-form-${taskId}`);
+                const formData = new FormData(form);
+                
+                fetch('/add-employee', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        sessionStorage.setItem('reopen_task_id', taskId);
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
 
-        <div class = "center">
+            function completeTaskByEmployee(taskId, employeeId) {
+                fetch(`/complete-task-by-employee/${taskId}/${employeeId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to show the updated task list
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            function reopenTask(taskId) {
+                fetch(`/reopen-task/${taskId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            // Attach click handlers to all employee buttons
+            document.addEventListener('DOMContentLoaded', function() {
+                const now = new Date();
+                const midnight = new Date(now);
+                midnight.setHours(24, 0, 0, 0);
+                window.setTimeout(() => location.reload(), midnight.getTime() - now.getTime() + 1000);
+
+                const reopenTaskId = sessionStorage.getItem('reopen_task_id');
+                if (reopenTaskId) {
+                    const reopenCheckbox = document.getElementById(`initial-${reopenTaskId}`);
+                    if (reopenCheckbox) {
+                        reopenCheckbox.checked = true;
+                    }
+                    sessionStorage.removeItem('reopen_task_id');
+                }
+
+                const employeeButtons = document.querySelectorAll('.employee-btn');
+                employeeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const taskId = this.getAttribute('data-task-id');
+                        const employeeId = this.getAttribute('data-employee-id');
+                        completeTaskByEmployee(taskId, employeeId);
+                    });
+                });
+
+                const completedTaskCheckboxes = document.querySelectorAll('.completed-task-checkbox');
+                completedTaskCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (!this.checked) {
+                            const taskId = this.getAttribute('data-task-id');
+                            reopenTask(taskId);
+                        }
+                    });
+                });
+            });
+        </script>
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
+        <div class="side-menu">
+            <a class = "add-task" href="/add-task">Tilføj opgave</a>
+            <a class = "add-task" href="/edit-task">Rediger opgave</a>
+            <a class = "add-task" href="/employees">Rediger initialliste</a>
+        </div>
+
+        <div class = "center week-header">
             <p> Uge {{week_number}} </p>
+            <a class="back-to-current-week" href="/?week=0&day={{today}}">Tilbage til I dag</a>
         </div>
         
         <div class="tab-bar">
             <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt;&lt;&lt;<br>Uge: {{week_number-1}} </a>
             <ul>
                 {% for d in day_list %}
-                <li><a class="day-tab {% if d.english == day %}active-tab{% endif %}" href="/?day={{d.english}}&week={{week}}">{{d.danish}}<br>{{d.date}}</a></li>
+                <li><a class="day-tab {% if d.english == day %}active-tab{% endif %} {% if d.date_obj == current_date %}today-tab{% endif %}" href="/?day={{d.english}}&week={{week}}">{{d.danish}}<br>{{d.date}}</a></li>
                 {% endfor %}
             </ul>
             <a class = "right-arrow" href="/?week={{week+1}}&day={{day}}">&gt;&gt;&gt;<br>Uge: {{week_number+1}}</a>
         </div>
 
         <div class="worklist">
-            <p>Morgenopgaver</p>
+            <p class="dagsopgave">Morgenopgaver</p>
             
             {% for task in tasks %}
                 {% if task.weekday == day and task.time_of_day == "morning" %}
-                <div class="task-row">
-                    <label class="tick-label">
-                        <input type="checkbox" class="tick-checkbox">
-                        <span class="tick-mark">✓</span>
-                    </label>
-                    <p>{{ task.title }} - {{ task.description }}</p>
+                <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
+                    <input type="checkbox" class="tick-checkbox" id="initial-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
+                        <label class="initial-label" for="initial-{{task.id}}"></label>
+                        
+                        <span class="initial-box">
+                            <div class="initial-header">
+                            <p>Vælg dine initialer</p>
+                            <hr style="margin: 10px 0;">
+                            <form method="POST" action="/add-employee" id="employee-form-{{task.id}}" onsubmit="handleAddEmployee(event, '{{task.id}}')">
+                                <div class="initial-input-row">
+                                <input type="text" name="initials" id="initials-input-{{task.id}}" placeholder="Nyt Initial">
+                                <button type="submit">Tilføj</button>
+                                </div>
+                                <input type="hidden" name="task_id" value="{{task.id}}">
+                            </form>
+                            </div>
+                            
+                            {% if used_today_employees %}
+                            <div class="used-today-box">
+                                <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 12px;">Brugt i dag</p>
+                                <div class="used-today-row">
+                                    {% for employee in used_today_employees %}
+                                    <button type="button" class="employee-btn employee-used-today" data-task-id="{{task.id}}" data-employee-id="{{employee.id}}">
+                                        {{employee.name}}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <hr style="margin: 8px 0;">
+                            </div>
+                            {% endif %}
+                            
+                            <div class="employee-list" id="employee-list-{{task.id}}">
+                                {% for letter, employees in employees_by_letter.items()|sort %}
+                                <div class="employee-letter-group">
+                                    {% for employee in employees %}
+                                    <button type="button" class="employee-btn" data-task-id="{{task.id}}" data-employee-id="{{employee.id}}">
+                                        {{employee.name}}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </span>
+                        <div class="task-card">
+                    <p>{{ task.title }}</p>
+                            <div class="info-popup">
+                                <label class="info-label">
+                                    <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
+                                    <label class="info-overlay" for="info-{{task.id}}"></label>                                    
+                                    <span class="info-text">i</span>
+                                    <span class="info-box">{{task.description}}</span>
+                                </label>
+                            </div>
+                    </div>
                 </div>    
                 {% endif %}
             {% endfor %}
             
 
-            <p>Middagsopgave</p>
+            <p class="dagsopgave">Middagsopgave</p>
             {% for task in tasks %}
                 {% if task.weekday == day and task.time_of_day == "midday" %}
-                    <p>{{ task.title }} - {{ task.description }}</p>
+                <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
+                        <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
+                        <div class="task-card">
+                    <p>{{ task.title }}</p>
+                            <div class="info-popup">
+                                <label class="info-label">
+                                    <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
+                                    <label class="info-overlay" for="info-{{task.id}}"></label>                                    
+                                    <span class="info-text">i</span>
+                                    <span class="info-box">{{task.description}}</span>
+                                </label>
+                            </div>
+                    </div>
+                </div>    
                 {% endif %}
             {% endfor %}
 
-            <p>Aftenopgaver</p>
+            <p class="dagsopgave">Aftenopgaver</p>
             {% for task in tasks %}
                 {% if task.weekday == day and task.time_of_day == "night" %}
-                    <p>{{ task.title }} - {{ task.description }}</p>
+                <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
+                        <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
+                        <div class="task-card">
+                    <p>{{ task.title }}</p>
+                            <div class="info-popup">
+                                <label class="info-label">
+                                    <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
+                                    <label class="info-overlay" for="info-{{task.id}}"></label>                                    
+                                    <span class="info-text">i</span>
+                                    <span class="info-box">{{task.description}}</span>
+                                </label>
+                            </div>
+                    </div>
+                </div>    
                 {% endif %}
             {% endfor %}
 
+            <p class="udførte-opgaver">Udførte opgaver</p>
+            {% for task in completed_tasks %}
+                {% if task.weekday == day %}
+                <div class="completed-task-row {% if not day_is_today %}locked-task{% endif %}">
+                    <input type="checkbox" class="completed-task-checkbox" data-task-id="{{task.id}}" checked {% if not day_is_today %}disabled{% endif %}>
+                    <p><strong>{{ task.title }}</strong></p>
+                    {% if task.completed_by %}
+                    <p>Udført af: {{ task.completed_by }}</p>
+                    {% endif %}
+                    {% if task.completed_time %}
+                    <p>Kl. {{ task.completed_time.strftime('%H:%M') }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
         </div>
     </body>
 </html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .tilbage {
+            top: 15px;
+            left: 15px;
+            text-decoration: none;
+            color: black;
+            border: 1px solid black;
+            border-radius: 5px;
+            background: none;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .page {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .add-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-form input {
+            padding: 6px 8px;
+            min-width: 220px;
+        }
+
+        .add-form button,
+        .edit-icon,
+        .delete-form button {
+            border: 1px solid black;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            color: black;
+            padding: 6px 10px;
+            text-decoration: none;
+        }
+
+        .employee-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .employee-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+
+        .employee-name {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .delete-form {
+            display: inline;
+            margin: 0;
+        }
+
+        .delete-form button {
+            background: red;
+        }
+    </style>
+    <title>Rediger initialliste</title>
+</head>
+<body>
+    <a class="tilbage" href="/">Tilbage</a>
+
+    <div class="page">
+        <h2>Initialliste</h2>
+
+        <form method="POST" action="/employees" class="add-form">
+            <input type="text" name="name" placeholder="Ny initial" required>
+            <button type="submit">Tilføj</button>
+        </form>
+
+        <div class="employee-list">
+            {% for employee in employees %}
+            <div class="employee-item">
+                <span class="employee-name">{{ employee.name }}</span>
+                <a href="/employees/{{ employee.id }}/edit" class="edit-icon">Rediger</a>
+                <form action="/employees/{{ employee.id }}/delete" method="POST" class="delete-form">
+                    <button type="submit">Slet</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

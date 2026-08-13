@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .tilbage {
+            top: 15px;
+            left: 15px;
+            text-decoration: none;
+            color: black;
+            border: 1px solid black;
+            border-radius: 5px;
+            background: none;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 400px;
+            text-align: center;
+            gap: 10px;
+        }
+
+        input {
+            text-align: center;
+            padding: 8px;
+        }
+
+        .error-message {
+            color: #b00020;
+            background-color: #ffe6e6;
+            border: 1px solid #d88;
+            border-radius: 5px;
+            padding: 8px;
+            font-weight: bold;
+        }
+
+        button {
+            border: 1px solid black;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            padding: 8px;
+        }
+    </style>
+    <title>Rediger initial</title>
+</head>
+<body>
+    <a class="tilbage" href="/employees">Tilbage</a>
+
+    <div class="form-container">
+        <form method="POST" action="/employees/{{ employee.id }}/edit">
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+
+            <label for="name">Initial</label>
+            <input type="text" id="name" name="name" value="{{ employee.name }}" required>
+
+            <button type="submit">Gem ændringer</button>
+        </form>
+    </div>
+</body>
+</html>
