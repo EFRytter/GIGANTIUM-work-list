@@ -36,9 +36,8 @@
             top: 2px;}
 
         .today-tab {
-            color: blue !important;
+            color: red !important;
         }
-        
         .left-arrow{
             text-decoration: none;
             text-align: center;
@@ -159,6 +158,15 @@
             overflow-wrap: anywhere;
             max-width: min(520px, 90vw);
         }
+
+        .info-box img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
         /* Når info-feltet er åbent, vises beskrivelsen i en lille popup. */
         .info-checkbox:checked ~ .info-box {
             display: flex;
@@ -401,6 +409,10 @@
             display: block;
         }
 
+        .complete-task-before {
+            color:  lightgrey;
+        }
+
     </style>
     <title> Home page </title>
     </head>
@@ -575,14 +587,21 @@
                             </div>
                         </span>
                         <div class="task-card">
-                    <p>{{ task.title }}</p>
-                            <div class="info-popup">
+                    <p>{{ task.title }} 
+                        <div class="complete-task-before">
+                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}</p>
+                        </div>                            <div class="info-popup">
                                 <label class="info-label">
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
                                     <label class="info-overlay" for="info-{{task.id}}"></label>                                    
                                     <span class="info-text">i</span>
                                     <!-- Beskrivelsen vises med pre-wrap, så linjeskift bevares. -->
-                                    <span class="info-box">{{task.description}}</span>
+                                    <span class="info-box">
+                                        {{- task.description -}} 
+                                        {% if task.image %}
+                                        <img src="{{url_for('static', filename='uploads/' + task.image)}}" alt="{{task.title}}">
+                                        {% endif %}
+                                    </span>
                                 </label>
                             </div>
                     </div>
@@ -597,13 +616,21 @@
                 <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
                         <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
                         <div class="task-card">
-                    <p>{{ task.title }}</p>
+                    <p>{{ task.title }} 
+                        <div class="complete-task-before">
+                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}</p>
+                        </div>
                             <div class="info-popup">
                                 <label class="info-label">
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
                                     <label class="info-overlay" for="info-{{task.id}}"></label>                                    
                                     <span class="info-text">i</span>
-                                    <span class="info-box">{{task.description}}</span>
+                                    <span class="info-box">
+                                        {{task.description}} 
+                                        {% if task.image %}
+                                        <img src="{{url_for('static', filename='uploads/' + task.image)}}" alt="{{task.title}}">
+                                        {% endif %}
+                                    </span>
                                 </label>
                             </div>
                     </div>
@@ -617,13 +644,20 @@
                 <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
                         <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
                         <div class="task-card">
-                    <p>{{ task.title }}</p>
-                            <div class="info-popup">
+                    <p>{{ task.title }} 
+                        <div class="complete-task-before">
+                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}</p>
+                        </div>                             <div class="info-popup">
                                 <label class="info-label">
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
                                     <label class="info-overlay" for="info-{{task.id}}"></label>                                    
                                     <span class="info-text">i</span>
-                                    <span class="info-box">{{task.description}}</span>
+                                    <span class="info-box">
+                                        {{task.description}} 
+                                        {% if task.image %}
+                                        <img src="{{url_for('static', filename='uploads/' + task.image)}}" alt="{{task.title}}">
+                                        {% endif %}
+                                    </span>
                                 </label>
                             </div>
                     </div>
@@ -639,9 +673,6 @@
                     <p><strong>{{ task.title }}</strong></p>
                     {% if task.completed_by %}
                     <p>Udført af: {{ task.completed_by }}</p>
-                    {% endif %}
-                    {% if task.completed_time %}
-                    <p>Kl. {{ task.completed_time.strftime('%H:%M') }}</p>
                     {% endif %}
                 </div>
                 {% endif %}

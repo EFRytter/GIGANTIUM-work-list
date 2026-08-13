@@ -15,6 +15,10 @@
         padding: 4px 8px;
     }
 
+    .save {
+        margin-top: 5px;
+    }
+
     .form-container {
         display: flex;
         justify-content: center;
@@ -100,6 +104,41 @@
                 <option value="night">Aften</option>
             </select>
 
+            <p>Tilføj specifikt tidspunkt (valgfrit)</p>
+            <div style="float: left; align-items: center; justify-content: center;">
+            <select name="specific_time_hh">
+                <option value="">HH</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+                <option value="09">09</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+            </select>
+            :
+            <select name="specific_time_mm">
+                <option value="">MM</option>
+                <option value="00">00</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+            </select>
+            </div>
+
             <p>Vælg hvilken dag om ugen opgaven skal udføres*</p>
             <div class="day-select-row" id="weekday-container">
                 <select name="weekday" data-required="true" required>
@@ -114,7 +153,7 @@
                 </select>
             </div>
             <button type="button" class="extra-day-btn" id="add-day-button">+ vælg ekstra dag opgaven skal udføres</button>
-            <button type="submit">Gem opgave</button>
+            <button class="save" type="submit">Gem opgave</button>
         </form>
         </div>
 

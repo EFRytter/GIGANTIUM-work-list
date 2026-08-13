@@ -21,15 +21,18 @@ class tasks(db.Model):
     completed = db.Column(db.Boolean, default=False)
     completed_by = db.Column(db.String(50), default=None)
     completed_time = db.Column(db.DateTime, default=None)
+    specific_time_hh = db.Column(db.String(2))
+    specific_time_mm = db.Column(db.String(2))
 
-
-    def __init__(self, title, description,time_of_day,weekday,image,completed):
+    def __init__(self, title, description,time_of_day,weekday,image,completed,specific_time_hh,specific_time_mm):
         self.title = title
         self.description = description
         self.time_of_day = time_of_day
         self.weekday = weekday
         self.image = image
         self.completed = completed
+        self.specific_time_hh = specific_time_hh
+        self.specific_time_mm = specific_time_mm
 
 class Employee(db.Model):
     id = db.Column("id",db.Integer,primary_key=True)
@@ -80,6 +83,7 @@ def employee_name_exists(name, exclude_employee_id=None):
         if (employee.name or "").strip().lower() == normalized_name:
             return True
     return False
+
 
 
 guide_entries = [
@@ -186,6 +190,8 @@ def add_task():
         time_of_day = request.form.get("time_of_day")
         image = request.files.get("image")
         selected_weekdays = get_selected_weekdays(request.form)
+        specific_time_hh = request.form.get("specific_time_hh")
+        specific_time_mm = request.form.get("specific_time_mm")
 
         if not validate_required_task_fields(request.form):
             return render_template("add-task.html", error="Du mangler at udfylde nogle felter. Alle felter markeret med * er obligatoriske.")
@@ -202,6 +208,8 @@ def add_task():
                 time_of_day=time_of_day,
                 weekday=weekday,
                 image=saved_image_name,
+                specific_time_hh=specific_time_hh,
+                specific_time_mm=specific_time_mm,
                 completed=False
             )
             db.session.add(new_task)
@@ -221,6 +229,8 @@ def edit_task(task_id):
         description = request.form.get("description") or ""
         time_of_day = request.form.get("time_of_day")
         selected_weekdays = get_selected_weekdays(request.form)
+        specific_time_hh = request.form.get("specific_time_hh")
+        specific_time_mm = request.form.get("specific_time_mm")
 
         if not title or not description.strip() or not time_of_day or not selected_weekdays:
             return render_template("edit-single-task.html", task=task, error="Du mangler at udfylde nogle felter. Alle felter markeret med * er obligatoriske.")
@@ -229,6 +239,8 @@ def edit_task(task_id):
         task.description = description
         task.time_of_day = time_of_day
         task.weekday = selected_weekdays[0]
+        task.specific_time_hh = specific_time_hh
+        task.specific_time_mm = specific_time_mm
 
         for weekday in selected_weekdays[1:]:
             duplicate_task = tasks(
@@ -237,6 +249,8 @@ def edit_task(task_id):
                 time_of_day=time_of_day,
                 weekday=weekday,
                 image=task.image,
+                specific_time_hh=specific_time_hh,
+                specific_time_mm=specific_time_mm,
                 completed=False
             )
             db.session.add(duplicate_task)
