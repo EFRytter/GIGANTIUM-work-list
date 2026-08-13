@@ -2,6 +2,7 @@
 <html>
 <head>
     <style>
+        /* Her kan du ændre navnet på ét initial ad gangen. */
         .tilbage {
             top: 15px;
             left: 15px;
@@ -59,13 +60,16 @@
 
     <div class="form-container">
         <form method="POST" action="/employees/{{ employee.id }}/edit">
+            <!-- Hvis der er noget galt med inputtet, vises beskeden her. -->
             {% if error %}
             <div class="error-message">{{ error }}</div>
             {% endif %}
 
+            <!-- Feltet viser det nuværende initial, så du nemt kan rette det. -->
             <label for="name">Initial</label>
             <input type="text" id="name" name="name" value="{{ employee.name }}" required>
 
+            <!-- Gemmer ændringen i databasen. -->
             <button type="submit">Gem ændringer</button>
         </form>
     </div>

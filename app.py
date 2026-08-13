@@ -9,6 +9,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
+# Denne model gemmer selve opgaverne i databasen.
+# Hver opgave har titel, beskrivelse, tidspunkt, dag og status for om den er færdig.
 class tasks(db.Model):
     id = db.Column("id",db.Integer, primary_key=True)
     title = db.Column (db.String(100))
@@ -40,6 +42,8 @@ class Employee(db.Model):
 
 
 def get_selected_weekdays(form):
+    # Samler den valgte dag og eventuelle ekstra dage fra formularen.
+    # Vi undgår dubletter, så samme dag ikke bliver gemt to gange.
     selected = []
     main_day = form.get("weekday")
     if main_day:
@@ -51,13 +55,57 @@ def get_selected_weekdays(form):
 
 
 def validate_required_task_fields(form):
+    # Tjekker om de vigtigste felter er udfyldt, før en opgave gemmes.
     title = (form.get("title") or "").strip()
-    description = (form.get("description") or "").strip()
+    description = form.get("description") or ""
     time_of_day = form.get("time_of_day")
     weekdays = get_selected_weekdays(form)
-    if not title or not description or not time_of_day or not weekdays:
+    if not title or not description.strip() or not time_of_day or not weekdays:
         return False
     return True
+
+
+def employee_name_exists(name, exclude_employee_id=None):
+    # Undersøger om et initial allerede findes i databasen.
+    # Det bruges både ved tilføjelse og redigering af initialer.
+    normalized_name = (name or "").strip().lower()
+    if not normalized_name:
+        return False
+
+    query = Employee.query
+    if exclude_employee_id is not None:
+        query = query.filter(Employee.id != exclude_employee_id)
+
+    for employee in query.all():
+        if (employee.name or "").strip().lower() == normalized_name:
+            return True
+    return False
+
+
+guide_entries = [
+    # Disse tekstblokke bruges til guide-siden.
+    # Du kan senere udvide listen med flere hjælpeemner, billeder og forklaringer.
+    {
+        "title": "Hvordan tilføjer jeg en opgave?",
+        "text": "Klik på menuen øverst til højre, vælg 'Tilføj opgave', og udfyld titel, beskrivelse, tidspunkt og dag(e). Du kan også tilføje et billede til opgaven.",
+        "image": None,
+    },
+    {
+        "title": "Hvordan redigerer jeg en opgave?",
+        "text": "Åbn 'Rediger opgave' i side menuen. Vælg den opgave, du vil ændre, og gem dine ændringer bagefter.",
+        "image": None,
+    },
+    {
+        "title": "Hvordan tilføjer jeg initialer?",
+        "text": "Tryk på opgaven på forsiden, skriv dit initial i feltet, og vælg tilføj. Hvis initialet allerede findes, får du en advarsel.",
+        "image": None,
+    },
+    {
+        "title": "Hvordan bruger jeg beskrivelsen?",
+        "text": "Beskrivelsen viser nu linjeskift præcist som du har skrevet dem, så du kan lave tydelige instruktioner i flere linjer.",
+        "image": None,
+    },
+]
 
 
 days_in_a_week = [
@@ -72,7 +120,7 @@ days_in_a_week = [
 
 @app.route('/')  # Connects the homepage address to the function below
 def home(): 
-    
+    # Forsiden viser opgaver for den valgte uge og den valgte dag.
     my_date = date.today()      # Gets todays date
     today = calendar.day_name[my_date.weekday()] # converts that date into a weekday name
     
@@ -131,9 +179,10 @@ def home():
 
 @app.route('/add-task', methods=["GET","POST"])
 def add_task():
+    # Denne side bruges til at oprette nye opgaver.
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
-        description = (request.form.get("description") or "").strip()
+        description = request.form.get("description") or ""
         time_of_day = request.form.get("time_of_day")
         image = request.files.get("image")
         selected_weekdays = get_selected_weekdays(request.form)
@@ -164,15 +213,16 @@ def add_task():
 
 @app.route('/edit-task/<int:task_id>', methods=["GET","POST"])
 def edit_task(task_id):
+    # Denne funktion åbner en bestemt opgave, så den kan redigeres.
     task = tasks.query.get_or_404(task_id)
 
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
-        description = (request.form.get("description") or "").strip()
+        description = request.form.get("description") or ""
         time_of_day = request.form.get("time_of_day")
         selected_weekdays = get_selected_weekdays(request.form)
 
-        if not title or not description or not time_of_day or not selected_weekdays:
+        if not title or not description.strip() or not time_of_day or not selected_weekdays:
             return render_template("edit-single-task.html", task=task, error="Du mangler at udfylde nogle felter. Alle felter markeret med * er obligatoriske.")
 
         task.title = title
@@ -198,6 +248,7 @@ def edit_task(task_id):
 
 @app.route('/edit-task')
 def edit_task_list():
+    # Viser oversigten over alle opgaver, så de kan redigeres eller slettes.
     return render_template("edit-task.html", tasks=tasks.query.all())
 
 @app.route('/edit-task/<int:task_id>/delete', methods=["POST"])
@@ -239,9 +290,16 @@ def reopen_task(task_id):
 
 @app.route('/add-employee', methods=["POST"])
 def add_employee():
-    name = request.form.get("initials")
+    # Tilføjer et nyt initial direkte fra popup-vinduet på forsiden.
+    name = (request.form.get("initials") or "").strip()
     task_id = request.form.get("task_id")
     
+    if not name:
+        return jsonify({"success": False, "message": "Initialet skal have et navn."}), 400
+
+    if employee_name_exists(name):
+        return jsonify({"success": False, "message": "Initialet findes allerede."}), 409
+
     if name:
         new_employee = Employee(name=name)
         db.session.add(new_employee)
@@ -251,8 +309,17 @@ def add_employee():
 
 @app.route('/employees', methods=['GET', 'POST'])
 def employee_list():
+    # Her kan du se, tilføje, redigere og slette initialer.
     if request.method == 'POST':
         name = (request.form.get('name') or '').strip()
+        if not name:
+            employees = Employee.query.order_by(Employee.name.asc()).all()
+            return render_template('edit-employee.html', employees=employees, error='Initialet skal have et navn.')
+
+        if employee_name_exists(name):
+            employees = Employee.query.order_by(Employee.name.asc()).all()
+            return render_template('edit-employee.html', employees=employees, error='Initialet findes allerede.')
+
         if name:
             new_employee = Employee(name=name)
             db.session.add(new_employee)
@@ -285,6 +352,12 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return redirect(url_for('employee_list'))
+
+
+@app.route('/guide')
+def guide():
+    # Den nye guideside samler korte hjælpesectioner i fold-ud bokse.
+    return render_template('guide.html', guide_entries=guide_entries)
 
 if __name__ == "__main__":
     with app.app_context():

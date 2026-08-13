@@ -2,6 +2,7 @@
 <html>
 <head>
     <style>
+        /* Grundlayout for dag-fanerne øverst på siden. */
         .day-tab {
             background-color: white;
             border-top-left-radius:  15px;
@@ -154,7 +155,11 @@
             background-color: white;
             border: 1px solid black;
             padding: 5px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            max-width: min(520px, 90vw);
         }
+        /* Når info-feltet er åbent, vises beskrivelsen i en lille popup. */
         .info-checkbox:checked ~ .info-box {
             display: flex;
         }
@@ -237,14 +242,46 @@
             right: 0;
             height: 100vh;
             width: 25%;
-            background: white;
+            background: #f8fbff;
             border: 2px solid black;
-            padding: 20px;
+            padding: 20px 18px;
             box-sizing: border-box;
             z-index: 20;
+            gap: 10px;
         }
+        /* Når hamburgermenuen er valgt, vises side-menuen. */
         .menu-toggle:checked ~ .side-menu {
             display: flex;
+        }
+
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.18);
+            z-index: 15;
+        }
+
+        /* Overlayet ligger bag menuen og gør, at man kan klikke udenfor for at lukke den. */
+        .menu-toggle:checked ~ .menu-overlay {
+            display: block;
+        }
+
+        .side-menu-link {
+            display: block;
+            text-decoration: none;
+            color: #0f172a;
+            background: #cfe8ff;
+            border: 1px solid #7fb7e8;
+            border-radius: 10px;
+            padding: 14px 14px;
+            margin: 0;
+            font-weight: 600;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.75) inset;
+        }
+
+        .side-menu-link:hover {
+            background: #bfe0ff;
         }
 
         .dagsopgave {
@@ -369,6 +406,7 @@
     </head>
     <body>
         <script>
+            // Når man vælger et initial til en opgave, sendes formularen med JavaScript.
             function handleAddEmployee(event, taskId) {
                 event.preventDefault();
                 const form = document.getElementById(`employee-form-${taskId}`);
@@ -383,12 +421,15 @@
                     if (data.success) {
                         sessionStorage.setItem('reopen_task_id', taskId);
                         location.reload();
+                    } else {
+                        alert(data.message || 'Kunne ikke tilføje initialet.');
                     }
                 })
                 .catch(error => console.error('Error:', error));
             }
 
             function completeTaskByEmployee(taskId, employeeId) {
+                // Marker en opgave som udført af en bestemt medarbejder.
                 fetch(`/complete-task-by-employee/${taskId}/${employeeId}`, {
                     method: 'POST'
                 })
@@ -403,6 +444,7 @@
             }
 
             function reopenTask(taskId) {
+                // Hvis en udført opgave afmarkeres, åbnes den igen.
                 fetch(`/reopen-task/${taskId}`, {
                     method: 'POST'
                 })
@@ -417,6 +459,7 @@
 
             // Attach click handlers to all employee buttons
             document.addEventListener('DOMContentLoaded', function() {
+                // Denne kode kører, når siden er færdig med at loade.
                 const now = new Date();
                 const midnight = new Date(now);
                 midnight.setHours(24, 0, 0, 0);
@@ -457,11 +500,14 @@
             <span></span>
             <span></span>
         </label>
+        <label for="menu-toggle" class="menu-overlay"></label>
 
         <div class="side-menu">
-            <a class = "add-task" href="/add-task">Tilføj opgave</a>
-            <a class = "add-task" href="/edit-task">Rediger opgave</a>
-            <a class = "add-task" href="/employees">Rediger initialliste</a>
+            <!-- Her ligger alle genveje i side menuen. -->
+            <a class="side-menu-link" href="/add-task">Tilføj opgave</a>
+            <a class="side-menu-link" href="/edit-task">Rediger opgave</a>
+            <a class="side-menu-link" href="/employees">Rediger initialliste</a>
+            <a class="side-menu-link" href="/guide">Guide</a>
         </div>
 
         <div class = "center week-header">
@@ -480,6 +526,7 @@
         </div>
 
         <div class="worklist">
+            <!-- Morgenopgaver vises først, derefter middag, aften og til sidst udførte opgaver. -->
             <p class="dagsopgave">Morgenopgaver</p>
             
             {% for task in tasks %}
@@ -534,6 +581,7 @@
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
                                     <label class="info-overlay" for="info-{{task.id}}"></label>                                    
                                     <span class="info-text">i</span>
+                                    <!-- Beskrivelsen vises med pre-wrap, så linjeskift bevares. -->
                                     <span class="info-box">{{task.description}}</span>
                                 </label>
                             </div>

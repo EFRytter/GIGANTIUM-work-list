@@ -2,6 +2,7 @@
 <html>
 <head>
     <style>
+        /* Denne side viser alle opgaver, så du kan redigere eller slette dem. */
         .weekday{
             text-decoration: none;
             color: black;
@@ -56,7 +57,10 @@
 <title> Edit task </title>
     </head>
     <body>
+        <!-- Knappen sender dig tilbage til forsiden. -->
         <a class="tilbage" href="/"> Tilbage </a>
+
+        <!-- Opgaverne er delt op efter ugedag, så det er lettere at finde dem. -->
         <p class="weekday">Mandag</p>
         {% for task in tasks %}
             {% if task.weekday == "Monday" %}
@@ -70,6 +74,7 @@
             {% endif %}
         {% endfor %}
 
+        <!-- Hver dag gentager samme mønster: titel, rediger og slet. -->
         <p class = "weekday">Tirsdag</p>
         {% for task in tasks %}
             {% if task.weekday == "Tuesday" %}

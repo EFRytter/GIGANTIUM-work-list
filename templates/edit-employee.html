@@ -2,6 +2,7 @@
 <html>
 <head>
     <style>
+        /* Denne side viser hele listen af initialer, så de kan styres ét sted. */
         .tilbage {
             top: 15px;
             left: 15px;
@@ -26,6 +27,17 @@
             margin-bottom: 20px;
             align-items: center;
             justify-content: center;
+        }
+
+        /* Advarslen bruges, hvis man prøver at gemme et tomt eller allerede eksisterende initial. */
+        .warning-message {
+            color: #b00020;
+            font-weight: bold;
+            margin: 8px 0 16px 0;
+            background-color: #ffe6e6;
+            border: 1px solid #d88;
+            border-radius: 5px;
+            padding: 8px;
         }
 
         .add-form input {
@@ -83,11 +95,18 @@
     <div class="page">
         <h2>Initialliste</h2>
 
+        <!-- Formularen herunder bruges til at oprette nye initialer. -->
         <form method="POST" action="/employees" class="add-form">
             <input type="text" name="name" placeholder="Ny initial" required>
             <button type="submit">Tilføj</button>
         </form>
 
+        <!-- Hvis backend sender en fejl, vises den her på siden. -->
+        {% if error %}
+        <div class="warning-message">{{ error }}</div>
+        {% endif %}
+
+        <!-- Hver medarbejder vises i sin egen række med redigér og slet. -->
         <div class="employee-list">
             {% for employee in employees %}
             <div class="employee-item">

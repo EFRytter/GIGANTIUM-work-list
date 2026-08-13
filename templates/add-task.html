@@ -2,6 +2,7 @@
 <html>
 <head>
     <style>
+    /* Siden er lavet enkelt, så fokus er på selve opgaveformularen. */
     .tilbage {
         top: 15px;
         left: 15px;
@@ -52,6 +53,7 @@
         padding: 8px;
     }
 
+    /* Her kan man vælge en eller flere dage for samme opgave. */
     .day-select-row {
         display: flex;
         flex-direction: column;
@@ -76,6 +78,7 @@
 
         <div class="form-container">
         <form action="/add-task" method="POST" enctype="multipart/form-data" id="add-task-form">
+            <!-- Viser en fejlbesked hvis et påkrævet felt mangler. -->
             {% if error %}
             <div class="warning-message">{{ error }}</div>
             {% endif %}
@@ -116,6 +119,7 @@
         </div>
 
         <script>
+            // Lader brugeren tilføje flere dage uden at skulle udfylde hele formularen igen.
             function addDaySelect() {
                 const container = document.getElementById('weekday-container');
                 const currentSelects = container.querySelectorAll('select');
@@ -151,6 +155,7 @@
             document.getElementById('add-day-button').addEventListener('click', addDaySelect);
 
             document.getElementById('add-task-form').addEventListener('submit', function(event) {
+                // Gør et hurtigt tjek, så tomme felter ikke sendes af sted.
                 const requiredFields = this.querySelectorAll('[data-required="true"]');
                 let missing = false;
 

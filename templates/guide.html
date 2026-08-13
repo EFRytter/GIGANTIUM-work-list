@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Guidesiden er bygget med fold-ud bokse, så den er nem at læse. */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f9ff;
+        }
+
+        .tilbage {
+            display: inline-block;
+            margin: 15px;
+            text-decoration: none;
+            color: black;
+            border: 1px solid black;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            padding: 6px 10px;
+        }
+
+        .guide-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 10px 20px 40px;
+        }
+
+        /* Hver guide-række er en selvstændig hjælpetekst, som kan foldes ud. */
+        .guide-row {
+            margin-bottom: 12px;
+            border: 1px solid #7fb7e8;
+            border-radius: 12px;
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        .guide-row summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 16px 18px;
+            background: #cfe8ff;
+            font-weight: 700;
+        }
+
+        .guide-row summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .guide-content {
+            padding: 16px 18px 18px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .guide-image {
+            margin-top: 14px;
+            max-width: 100%;
+            border-radius: 10px;
+            border: 1px solid #d7e6f7;
+        }
+    </style>
+    <title>Guide</title>
+</head>
+<body>
+    <a class="tilbage" href="/">Tilbage</a>
+
+    <div class="guide-page">
+        <h1>Guide</h1>
+        <!-- Alle guide-emner kommer fra listen i app.py. -->
+        {% for entry in guide_entries %}
+        <details class="guide-row">
+            <summary>{{ entry.title }}</summary>
+            <div class="guide-content">
+                <!-- Teksten her kan være længere, og den bevarer linjeskift. -->
+                {{ entry.text }}
+                {% if entry.image %}
+                <!-- Hvis et emne får et billede, vises det under teksten. -->
+                <img class="guide-image" src="{{ entry.image }}" alt="{{ entry.title }}">
+                {% endif %}
+            </div>
+        </details>
+        {% endfor %}
+    </div>
+</body>
+</html>
