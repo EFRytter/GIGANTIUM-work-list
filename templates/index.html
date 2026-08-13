@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         /* Grundlayout for dag-fanerne øverst på siden. */
         .day-tab {
             background-color: white;
             border-top-left-radius:  15px;
             border-top-right-radius:  15px;
-            border: 2px solid black;
+            border: 1px solid lightgrey;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -22,7 +23,7 @@
             background-color: white;
             border-top-left-radius:  15px;
             border-top-right-radius:  15px;
-            border: 2px solid black;
+            border: 1px solid lightgrey;
             border-bottom: none;
             display: flex;
             justify-content: center;
@@ -38,20 +39,37 @@
         .today-tab {
             color: red !important;
         }
+        
         .left-arrow{
             text-decoration: none;
             text-align: center;
             align-items: center;
             justify-content: center;
             display: flex;
-            color: black;}
+            margin-left: 5px;
+            color: black;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            height: 25px;
+            width: 25px;
+            font-size: 80%;
+            
+        }
+            
         .right-arrow{
             text-decoration: none;
             text-align: center;
             align-items: center;
             justify-content: center;
             display: flex;
-            color: black;}
+            margin-right: 50px;
+            color: black;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            height: 25px;
+            width: 25px;
+            font-size: 80%;
+        }
 
         ul {
             list-style-type: none;
@@ -77,10 +95,9 @@
             align-items: center;}
 
         .week-header {
-            position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             gap: 12px;
             margin-top: 8px;
             min-height: 32px;
@@ -88,24 +105,23 @@
 
         .week-header p {
             margin: 0;
+            font-size: 110%;
         }
 
         .back-to-current-week {
-            position: absolute;
-            right: 25%;
-            top: 50%;
-            transform: translateY(-50%);
+            justify-content: center;
+            align-items: center;
             text-decoration: none;
             color: black;
-            border: 1px solid black;
+            border: 1px solid lightgrey;
             border-radius: 6px;
             padding: 4px 10px;
             background-color: white;
-            font-size: 14px;
+            font-size: 75%;
         }
         
         .worklist {
-            border: 2px solid black;
+            border: 1px solid lightgrey;
             height: 500px;
             margin-top: -2px;
         }
@@ -125,7 +141,7 @@
         }
         .info-text{
             background: white;
-            border: 1px solid black;
+            border: 1px solid lightgrey;
             width: 20px;
             height: 20px;
             border-radius: 50%;
@@ -152,7 +168,7 @@
             left: 50%;
             transform: translate(-50%,-50%);
             background-color: white;
-            border: 1px solid black;
+            border: 1px solid lightgrey;
             padding: 5px;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
@@ -228,18 +244,18 @@
         }
         .hamburger-icon {
             position: fixed;
-            top: 15px;
+            top: 14px;
             right: 15px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 7px;
             cursor: pointer;
             z-index: 10;
         }
         .hamburger-icon span {
             width: 30px;
-            height: 4px;
-            background: black;
+            height: 3px;
+            background: grey;
             border-radius: 2px;
         }
         .side-menu {
@@ -251,7 +267,7 @@
             height: 100vh;
             width: 25%;
             background: #f8fbff;
-            border: 2px solid black;
+            border: 1px solid lightgrey;
             padding: 20px 18px;
             box-sizing: border-box;
             z-index: 20;
@@ -392,7 +408,7 @@
             left: 50%;
             transform: translate(-50%,-50%);
             background-color: white;
-            border: 1px solid black;
+            border: 1px solid lightgrey;
             padding: 12px;
             width: 400px;
             max-height: 100vh;
@@ -523,18 +539,24 @@
         </div>
 
         <div class = "center week-header">
-            <p> Uge {{week_number}} </p>
-            <a class="back-to-current-week" href="/?week=0&day={{today}}">Tilbage til I dag</a>
+            <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt; </a>
+            <p> 
+                <i class="fa fa-calendar" style="color: grey;"></i>
+                Uge {{week_number}} </p>
+            <a class="back-to-current-week" href="/?week=0&day={{today}}">
+                <i class="fa fa-calendar" style="color: grey;"></i>
+                Tilbage til I dag</a>
+            <a class = "right-arrow" href="/?week={{week+1}}&day={{day}}">&gt;</a>
         </div>
         
         <div class="tab-bar">
-            <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt;&lt;&lt;<br>Uge: {{week_number-1}} </a>
+            
             <ul>
                 {% for d in day_list %}
                 <li><a class="day-tab {% if d.english == day %}active-tab{% endif %} {% if d.date_obj == current_date %}today-tab{% endif %}" href="/?day={{d.english}}&week={{week}}">{{d.danish}}<br>{{d.date}}</a></li>
                 {% endfor %}
             </ul>
-            <a class = "right-arrow" href="/?week={{week+1}}&day={{day}}">&gt;&gt;&gt;<br>Uge: {{week_number+1}}</a>
+            
         </div>
 
         <div class="worklist">
@@ -588,9 +610,11 @@
                         </span>
                         <div class="task-card">
                     <p>{{ task.title }} 
-                        <div class="complete-task-before">
-                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}</p>
-                        </div>                            <div class="info-popup">
+                        <span class="complete-task-before">
+                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}
+                        </span> 
+                    </p>                           
+                            <div class="info-popup">
                                 <label class="info-label">
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
                                     <label class="info-overlay" for="info-{{task.id}}"></label>                                    
@@ -617,9 +641,10 @@
                         <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
                         <div class="task-card">
                     <p>{{ task.title }} 
-                        <div class="complete-task-before">
-                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}</p>
-                        </div>
+                        <span class="complete-task-before">
+                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}
+                        </span> 
+                    </p> 
                             <div class="info-popup">
                                 <label class="info-label">
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
@@ -645,9 +670,10 @@
                         <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
                         <div class="task-card">
                     <p>{{ task.title }} 
-                        <div class="complete-task-before">
-                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}</p>
-                        </div>                             <div class="info-popup">
+                        <span class="complete-task-before">
+                        {% if task.specific_time_hh and task.specific_time_mm%} - Udfør opgaven kl. {{ task.specific_time_hh }}:{{ task.specific_time_mm}} {% endif %}
+                        </span> 
+                    </p>                              <div class="info-popup">
                                 <label class="info-label">
                                     <input type="checkbox" class="info-checkbox" id="info-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
                                     <label class="info-overlay" for="info-{{task.id}}"></label>                                    
