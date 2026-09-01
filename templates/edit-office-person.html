@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f9ff;
+            color: #0f172a;
+        }
+
+        .page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 24px 18px 48px;
+        }
+
+        .tilbage,
+        .save-button,
+        .delete-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: 1px solid #7fb7e8;
+            border-radius: 10px;
+            background: #cfe8ff;
+            cursor: pointer;
+            padding: 10px 14px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .tilbage {
+            border-color: lightgrey;
+            background: white;
+            padding: 8px 12px;
+            margin-bottom: 18px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #7fb7e8;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px dashed #7fb7e8;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #f8fbff;
+            color: #0f172a;
+            cursor: pointer;
+            font-weight: 700;
+            width: fit-content;
+        }
+
+        .file-label input {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 320px;
+            border-radius: 12px;
+            border: 1px solid #d7e6f7;
+            object-fit: contain;
+            background: white;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .save-button:hover {
+            background: #bfe0ff;
+        }
+
+        .delete-button {
+            background: #ffe6e6;
+            border-color: #e58a8a;
+        }
+
+        .warning-message {
+            color: #b00020;
+            background-color: #ffe6e6;
+            border: 1px solid #d88;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: bold;
+        }
+
+        .field-label {
+            display: block;
+            margin: 0 0 4px 2px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .field-label small {
+            font-weight: 400;
+            color: #64748b;
+        }
+
+        .report-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+        }
+
+        .report-toggle-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            justify-content: flex-start;
+            margin-top: -4px;
+        }
+
+        .preview-label {
+            font-weight: 700;
+            margin: 0;
+        }
+
+    </style>
+    <title>Rediger kontaktperson</title>
+</head>
+<body>
+    <div class="page">
+        <a class="tilbage" href="/kontor-oplysninger">Tilbage</a>
+
+        <div class="card">
+            <h1>Rediger kontaktperson</h1>
+            {% if error %}
+            <div class="warning-message">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="/kontor-oplysninger/{{ person.id }}/edit" enctype="multipart/form-data">
+                <div>
+                    <label class="field-label" for="name">Navn *</label>
+                    <input type="text" id="name" name="name" value="{{ person.name }}" required>
+                </div>
+                <div>
+                    <label class="field-label" for="title">Arbejdstitel *</label>
+                    <input type="text" id="title" name="title" value="{{ person.title }}" required>
+                </div>
+                <div>
+                    <label class="field-label" for="phone">Tlf nr <small>(Valgfrit)</small></label>
+                    <input type="text" id="phone" name="phone" value="{{ person.phone }}">
+                </div>
+                <div>
+                    <label class="field-label" for="email">Mail *</label>
+                    <input type="email" id="email" name="email" value="{{ person.email }}" required>
+                </div>
+                <label class="report-toggle-line">
+                    <input type="checkbox" name="receive_report" {% if person.receive_report %}checked{% endif %}>
+                    Månedsrapport
+                </label>
+                <div>
+                    <label class="field-label" for="bio">Kort tekst</label>
+                    <textarea id="bio" name="bio" placeholder="Hvem er personen, og hvornår kan de kontaktes?">{{ person.bio or '' }}</textarea>
+                </div>
+                {% if person.image %}
+                <div class="button-row">
+                    <button class="delete-button" type="submit" name="remove_image" value="on">Slet billede</button>
+                </div>
+                {% else %}
+                <div class="button-row">
+                    <label class="file-label" for="image">Tilføj billede <small>(Valgfrit)</small></label>
+                    <input type="file" id="image" name="image" accept="image/*" capture="environment" style="display:none;">
+                </div>
+                {% endif %}
+                {% if person.image %}
+                <div>
+                    <p class="preview-label">Nuværende billede</p>
+                    <img class="image-preview" src="{{ url_for('static', filename='uploads/' + person.image) }}" alt="{{ person.name }}">
+                </div>
+                {% endif %}
+                <div>
+                    <p class="preview-label">Valgt billede</p>
+                    <img id="selected-image-preview" class="image-preview" style="display:none;" alt="Forhåndsvisning af valgt billede">
+                </div>
+                <div class="button-row">
+                    <button class="save-button" type="submit">Gem ændringer</button>
+                </div>
+            </form>
+
+            <form method="POST" action="/kontor-oplysninger/{{ person.id }}/delete" onsubmit="return confirm('Vil du slette denne kontaktperson?');">
+                <div class="button-row" style="margin-top: 16px;">
+                    <button class="delete-button" type="submit">Slet kontaktperson</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('image');
+        const previewImage = document.getElementById('selected-image-preview');
+
+        if (imageInput && previewImage) {
+            imageInput.addEventListener('change', function () {
+                const file = this.files && this.files[0];
+                if (!file) {
+                    previewImage.style.display = 'none';
+                    previewImage.removeAttribute('src');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    previewImage.src = event.target.result;
+                    previewImage.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+</html>

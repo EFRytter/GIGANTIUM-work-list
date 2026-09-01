@@ -62,7 +62,7 @@
             align-items: center;
             justify-content: center;
             display: flex;
-            margin-right: 50px;
+            margin-right: 5px;
             color: black;
             border: 1px solid lightgrey;
             border-radius: 5px;
@@ -97,15 +97,22 @@
         .week-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             gap: 12px;
             margin-top: 8px;
             min-height: 32px;
+            position: relative;
+            padding: 0 52px;
         }
 
         .week-header p {
             margin: 0;
             font-size: 110%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            white-space: nowrap;
         }
 
         .back-to-current-week {
@@ -368,6 +375,12 @@
             
         }
 
+        .employee-unknown {
+            font-weight: bold;
+            background-color: #ffe08a;
+            border-color: #d2b14c;
+        }
+
         .completed-task-row {
             background-color: lightgrey;
             display: flex;
@@ -471,6 +484,19 @@
                 .catch(error => console.error('Error:', error));
             }
 
+            function completeTaskUnknown(taskId) {
+                fetch(`/complete-task-unknown/${taskId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
             function reopenTask(taskId) {
                 // Hvis en udført opgave afmarkeres, åbnes den igen.
                 fetch(`/reopen-task/${taskId}`, {
@@ -511,6 +537,14 @@
                     });
                 });
 
+                const unknownButtons = document.querySelectorAll('.unknown-task-btn');
+                unknownButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const taskId = this.getAttribute('data-task-id');
+                        completeTaskUnknown(taskId);
+                    });
+                });
+
                 const completedTaskCheckboxes = document.querySelectorAll('.completed-task-checkbox');
                 completedTaskCheckboxes.forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
@@ -535,10 +569,11 @@
             <a class="side-menu-link" href="/add-task">Tilføj opgave</a>
             <a class="side-menu-link" href="/edit-task">Rediger opgave</a>
             <a class="side-menu-link" href="/employees">Rediger initialliste</a>
+            <a class="side-menu-link" href="/kontor-oplysninger">Kontor oplysninger</a>
             <a class="side-menu-link" href="/guide">Guide</a>
         </div>
 
-        <div class = "center week-header">
+        <div class="week-header">
             <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt; </a>
             <p> 
                 <i class="fa fa-calendar" style="color: grey;"></i>
@@ -591,6 +626,16 @@
                                         {{employee.name}}
                                     </button>
                                     {% endfor %}
+                                </div>
+                                <hr style="margin: 8px 0;">
+                            </div>
+                            {% endif %}
+
+                            {% if show_unknown_button %}
+                            <div class="used-today-box">
+                                <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 12px;">Sidste time før luk</p>
+                                <div class="used-today-row">
+                                    <button type="button" class="employee-btn employee-unknown unknown-task-btn" data-task-id="{{task.id}}">Ukendt initial</button>
                                 </div>
                                 <hr style="margin: 8px 0;">
                             </div>
