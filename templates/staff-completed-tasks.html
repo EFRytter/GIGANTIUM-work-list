@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Overblik over udførte opgaver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 12px;
+            font-size: 13px;
+            line-height: 1.25;
+        }
+
+        .back {
+            display: inline-block;
+            text-decoration: none;
+            color: black;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 4px 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .date-box {
+            margin-top: 8px;
+            background: #f9fafb;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .date-title {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 8px;
+            padding: 3px 4px;
+            align-items: center;
+            border-radius: 4px;
+        }
+
+        .task-time {
+            min-width: 42px;
+            font-weight: 600;
+        }
+
+        .row-unknown {
+            background: #ffe2b8;
+        }
+
+        .muted {
+            color: #667085;
+        }
+    </style>
+</head>
+<body>
+    <a class="back" href="/">← Tilbage</a>
+
+    {% if grouped_rows %}
+        {% for group in grouped_rows %}
+        <div class="date-box">
+            <p class="date-title"><strong>{{ group["display_date"] }}</strong></p>
+            {% for item in group["items"] %}
+            <div class="row {% if item["is_unknown"] %}row-unknown{% endif %}">
+                <span class="task-time muted">{{ item["completed_time_display"] }}</span>
+                <span>{{ item.task_title }}</span>
+                <span>{{ item["completed_by_display"] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

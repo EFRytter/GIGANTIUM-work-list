@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import smtplib
+import random
 from collections import Counter, defaultdict
 from datetime import date, timedelta, datetime
 from email.message import EmailMessage
@@ -30,6 +31,44 @@ CLOSING_TIMES = {
     "Saturday": (17, 30),
     "Sunday": (16, 30),
 }
+
+DANISH_WEEKDAY_NAMES = {
+    0: "Mandag",
+    1: "Tirsdag",
+    2: "Onsdag",
+    3: "Torsdag",
+    4: "Fredag",
+    5: "Lørdag",
+    6: "Søndag",
+}
+
+DANISH_MONTH_NAMES = {
+    1: "januar",
+    2: "februar",
+    3: "marts",
+    4: "april",
+    5: "maj",
+    6: "juni",
+    7: "juli",
+    8: "august",
+    9: "september",
+    10: "oktober",
+    11: "november",
+    12: "december",
+}
+
+DAILY_COMPLETION_MESSAGES = [
+    "Godt gået! I har klaret alle dagens opgaver. 🎉✅",
+    "Alle opgaver er udført. Nu må I med god samvittighed holde fri. ☕🛋️",
+    "Dagens to do-liste er tom. Flot arbejde! ✨📋",
+    "Mission fuldført: Alle opgaver for i dag er løst. 🚀🏆",
+    "Sådan! I er igennem dagens opgaver — vi ses snart igen. 👋😊",
+    "Alt er ordnet for i dag. Tid til en velfortjent pause. 🌿😌",
+    "Dagens opgaver er i mål. I må gerne være lidt stolte nu. 🎯🙌",
+    "Alle opgaver er gennemført. I kan roligt sove godt i nat. 🌙😴",
+    "Fremragende indsats! 🥳🧹",
+    "Dagen er officielt klaret. Godt arbejde! 💪✨",
+]
 
 # Denne model gemmer selve opgaverne i databasen.
 # Hver opgave har titel, beskrivelse, tidspunkt, dag og status for om den er færdig.
@@ -181,6 +220,7 @@ def ensure_completion_db():
             f"""
             CREATE TABLE IF NOT EXISTS {COMPLETION_DB_TABLE} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_id INTEGER,
                 task_title TEXT NOT NULL,
                 completed_by TEXT NOT NULL,
                 completed_at TEXT NOT NULL,
@@ -189,26 +229,58 @@ def ensure_completion_db():
             )
             """
         )
+        columns = connection.execute(f"PRAGMA table_info({COMPLETION_DB_TABLE})").fetchall()
+        column_names = {column[1] for column in columns}
+        if "task_id" not in column_names:
+            connection.execute(f"ALTER TABLE {COMPLETION_DB_TABLE} ADD COLUMN task_id INTEGER")
         connection.commit()
 
 
-def record_completed_task(task_title, completed_by, completed_at):
+def purge_old_completed_task_rows():
     ensure_completion_db()
+    cutoff_datetime = datetime.now() - timedelta(days=30)
+    cutoff_iso = cutoff_datetime.isoformat(timespec="seconds")
+    with sqlite3.connect(COMPLETION_DB_PATH) as connection:
+        connection.execute(
+            f"DELETE FROM {COMPLETION_DB_TABLE} WHERE completed_at < ?",
+            (cutoff_iso,),
+        )
+        connection.commit()
+
+
+def record_completed_task(task_id, task_title, completed_by, completed_at):
+    ensure_completion_db()
+    purge_old_completed_task_rows()
     completed_date = completed_at.strftime("%Y-%m-%d")
     completed_time = completed_at.strftime("%H:%M")
     with sqlite3.connect(COMPLETION_DB_PATH) as connection:
         connection.execute(
+            f"DELETE FROM {COMPLETION_DB_TABLE} WHERE task_id = ?",
+            (task_id,),
+        )
+        connection.execute(
             f"""
-            INSERT INTO {COMPLETION_DB_TABLE} (task_title, completed_by, completed_at, completed_date, completed_time)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO {COMPLETION_DB_TABLE} (task_id, task_title, completed_by, completed_at, completed_date, completed_time)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (task_title, completed_by, completed_at.isoformat(timespec="seconds"), completed_date, completed_time),
+            (task_id, task_title, completed_by, completed_at.isoformat(timespec="seconds"), completed_date, completed_time),
+        )
+        connection.commit()
+
+
+def delete_completed_task_row_for_task(task_id):
+    ensure_completion_db()
+    with sqlite3.connect(COMPLETION_DB_PATH) as connection:
+        connection.execute(
+            f"DELETE FROM {COMPLETION_DB_TABLE} WHERE task_id = ?",
+            (task_id,),
         )
         connection.commit()
 
 
 def fetch_completed_task_rows(year, month):
     ensure_completion_db()
+    purge_old_completed_task_rows()
     start_date = date(year, month, 1)
     end_date = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
     with sqlite3.connect(COMPLETION_DB_PATH) as connection:
@@ -237,6 +309,25 @@ def delete_completed_task_rows_for_month(year, month):
         connection.commit()
 
 
+def fetch_recent_completed_task_rows(days=30):
+    ensure_completion_db()
+    purge_old_completed_task_rows()
+    start_datetime = datetime.now() - timedelta(days=days)
+    start_iso = start_datetime.isoformat(timespec="seconds")
+    with sqlite3.connect(COMPLETION_DB_PATH) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            f"""
+            SELECT task_id, task_title, completed_by, completed_at, completed_date, completed_time
+            FROM {COMPLETION_DB_TABLE}
+            WHERE completed_at >= ?
+            ORDER BY completed_date ASC, completed_time ASC, id ASC
+            """,
+            (start_iso,),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def save_uploaded_image(image_file):
     if not image_file or image_file.filename == "":
         return None
@@ -256,6 +347,11 @@ def should_show_unknown_button(reference_date):
     window_start = closing_time - timedelta(hours=1)
     current_datetime = datetime.now()
     return current_datetime.date() == reference_date and window_start <= current_datetime < closing_time
+
+
+def is_unknown_completed_by(value):
+    normalized = (value or "").strip().lower()
+    return normalized in {"unknown", "unknown initial", "ukendt", "ukendt initial"}
 
 
 @app.context_processor
@@ -285,11 +381,6 @@ guide_entries = [
     {
         "title": "Hvordan bruger jeg beskrivelsen?",
         "text": "Beskrivelsen viser nu linjeskift præcist som du har skrevet dem, så du kan lave tydelige instruktioner i flere linjer.",
-        "image": None,
-    },
-    {
-        "title": "Hvordan redigerer jeg kontoroplysninger?",
-        "text": "Åbn 'Kontor oplysninger' i menuen. Her kan du tilføje kontorpersoner og redigere navn, kontaktinfo og billede via blyant-ikonet.",
         "image": None,
     },
 ]
@@ -347,6 +438,9 @@ def home():
     all_tasks = tasks.query.all()
     active_tasks = [t for t in all_tasks if not t.completed]
     completed_tasks = [t for t in all_tasks if t.completed]
+    day_tasks = [t for t in all_tasks if t.weekday == day]
+    all_day_tasks_completed = bool(day_tasks) and all(t.completed for t in day_tasks)
+    completion_popup_message = random.choice(DAILY_COMPLETION_MESSAGES) if all_day_tasks_completed else None
     
     return render_template(
         "index.html",
@@ -361,8 +455,10 @@ def home():
         employees_by_letter=employees_by_letter,
         current_date=my_date,
         selected_day_date=selected_day_date,
+        selected_day_key=selected_day_date.isoformat(),
         day_is_today=(selected_day_date == my_date),
-        show_unknown_button=should_show_unknown_button(selected_day_date)
+        show_unknown_button=should_show_unknown_button(selected_day_date),
+        completion_popup_message=completion_popup_message,
     )  # Access the index.html template
 
 @app.route('/add-task', methods=["GET","POST"])
@@ -475,9 +571,9 @@ def delete_task(task_id):
 def complete_task(task_id):
     task = tasks.query.get_or_404(task_id)
     task.completed = True
-    task.completed_by = "Ukendt initial"
+    task.completed_by = "Ukendt"
     task.completed_time = datetime.now()
-    record_completed_task(task.title, "Ukendt initial", task.completed_time)
+    record_completed_task(task.id, task.title, "Ukendt", task.completed_time)
     db.session.commit()
     return redirect(url_for("home"))
 
@@ -492,7 +588,7 @@ def complete_task_by_employee(task_id, employee_id):
     task.completed_time = completed_at
     
     employee.last_used = completed_at
-    record_completed_task(task.title, employee.name, completed_at)
+    record_completed_task(task.id, task.title, employee.name, completed_at)
     
     db.session.commit()
     return jsonify({"success": True, "message": "Task completed"})
@@ -504,12 +600,12 @@ def complete_task_unknown(task_id):
     completed_at = datetime.now()
 
     task.completed = True
-    task.completed_by = "Ukendt initial"
+    task.completed_by = "Ukendt"
     task.completed_time = completed_at
-    record_completed_task(task.title, "Ukendt initial", completed_at)
+    record_completed_task(task.id, task.title, "Ukendt", completed_at)
 
     db.session.commit()
-    return jsonify({"success": True, "message": "Task completed as Ukendt initial"})
+    return jsonify({"success": True, "message": "Task completed as Ukendt"})
 
 @app.route('/reopen-task/<int:task_id>', methods=["POST"])
 def reopen_task(task_id):
@@ -517,15 +613,12 @@ def reopen_task(task_id):
     task.completed = False
     task.completed_by = None
     task.completed_time = None
+    delete_completed_task_row_for_task(task.id)
     db.session.commit()
     return jsonify({"success": True, "message": "Task reopened"})
 
 @app.route('/add-employee', methods=["POST"])
 def add_employee():
-    guard = require_staff()
-    if guard:
-        return guard
-
     # Tilføjer et nyt initial direkte fra popup-vinduet på forsiden.
     name = (request.form.get("initials") or "").strip()
     task_id = request.form.get("task_id")
@@ -609,7 +702,7 @@ def staff_login():
         code = (request.form.get('code') or '').strip()
         if code == STAFF_LOGIN_CODE:
             session['is_staff'] = True
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))
         error = 'Forkert kode.'
     return render_template('staff-login.html', error=error)
 
@@ -617,7 +710,7 @@ def staff_login():
 @app.route('/staff-logout')
 def staff_logout():
     session.pop('is_staff', None)
-    return redirect(url_for('index'))
+    return redirect(url_for('home'))
 
 
 @app.route('/kontor-oplysninger', methods=['GET', 'POST'])
@@ -702,21 +795,19 @@ def staff_completed_tasks():
     if guard:
         return guard
 
-    month_options = get_recent_month_options(3)
-    selected_month_value = request.args.get('month')
-    selected_month = parse_month_value(selected_month_value) if selected_month_value else None
-    if selected_month is None:
-        selected_month = (month_options[0][2], month_options[0][3])
-        selected_month_value = month_options[0][0]
-
-    year, month = selected_month
-    rows = fetch_completed_task_rows(year, month)
+    rows = fetch_recent_completed_task_rows(30)
     grouped_rows = group_completed_rows_by_date(rows)
+    for group in grouped_rows:
+        parsed_date = datetime.strptime(group["date"], "%Y-%m-%d").date()
+        weekday_name = DANISH_WEEKDAY_NAMES[parsed_date.weekday()]
+        month_name = DANISH_MONTH_NAMES[parsed_date.month]
+        group["display_date"] = f"{weekday_name} {parsed_date.day}. {month_name}"
+        for item in group["items"]:
+            item["is_unknown"] = is_unknown_completed_by(item.get("completed_by"))
+            item["completed_by_display"] = "Ukendt" if item["is_unknown"] else (item.get("completed_by") or "")
+            item["completed_time_display"] = (item.get("completed_time") or "").replace(":", ".")
     return render_template(
         'staff-completed-tasks.html',
-        month_options=month_options,
-        selected_month_value=selected_month_value,
-        selected_month_label=f"{calendar.month_name[month]} {year}",
         grouped_rows=grouped_rows,
     )
 
@@ -729,6 +820,7 @@ def guide():
 if __name__ == "__main__":
     with app.app_context():
         ensure_completion_db()
+        purge_old_completed_task_rows()
         db.create_all()
     app.run(debug=True)
 

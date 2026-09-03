@@ -37,7 +37,7 @@
             top: 2px;}
 
         .today-tab {
-            color: red !important;
+            color: rgb(120, 196, 221) !important;
         }
         
         .left-arrow{
@@ -251,7 +251,7 @@
         }
         .hamburger-icon {
             position: fixed;
-            top: 14px;
+            top: 10px;
             right: 15px;
             display: flex;
             flex-direction: column;
@@ -264,6 +264,46 @@
             height: 3px;
             background: grey;
             border-radius: 2px;
+        }
+
+        .guide-floating-btn {
+            position: fixed;
+            top: 10px;
+            right: 15px;
+            text-decoration: none;
+            color: #0f172a;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            background: white;
+            padding: 4px 10px;
+            font-size: 80%;
+            z-index: 10;
+        }
+
+        .mode-status-panel {
+            position: fixed;
+            top: 10px;
+            right: 80px;
+                z-index: 9;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .mode-switch-btn {
+            text-decoration: none;
+            color: #0f172a;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            background: white;
+            padding: 4px 10px;
+            font-size: 80%;
+        }
+
+        .side-menu-logout {
+            margin-top: auto;
+            background: #ffe0e0;
+            border-color: #e2a4a4;
         }
         .side-menu {
             display: none;
@@ -442,6 +482,46 @@
             color:  lightgrey;
         }
 
+        .daily-completion-popup {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.35);
+            z-index: 60;
+            padding: 12px;
+        }
+
+        .daily-completion-popup.show {
+            display: flex;
+        }
+
+        .daily-completion-card {
+            background: white;
+            border: 1px solid #d2d7de;
+            border-radius: 10px;
+            padding: 14px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .daily-completion-text {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .daily-completion-close {
+            border: 1px solid lightgrey;
+            border-radius: 6px;
+            background: white;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
     </style>
     <title> Home page </title>
     </head>
@@ -511,6 +591,13 @@
                 .catch(error => console.error('Error:', error));
             }
 
+            function closeDailyCompletionPopup() {
+                const popup = document.getElementById('daily-completion-popup');
+                if (popup) {
+                    popup.classList.remove('show');
+                }
+            }
+
             // Attach click handlers to all employee buttons
             document.addEventListener('DOMContentLoaded', function() {
                 // Denne kode kører, når siden er færdig med at loade.
@@ -528,7 +615,7 @@
                     sessionStorage.removeItem('reopen_task_id');
                 }
 
-                const employeeButtons = document.querySelectorAll('.employee-btn');
+                const employeeButtons = document.querySelectorAll('.employee-btn:not(.unknown-task-btn)');
                 employeeButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         const taskId = this.getAttribute('data-task-id');
@@ -554,8 +641,43 @@
                         }
                     });
                 });
+
+                const completionPopupPayload = document.getElementById('daily-completion-payload');
+                const completionPopupMessage = completionPopupPayload ? completionPopupPayload.getAttribute('data-message') : '';
+                const completionPopupDayKey = completionPopupPayload ? completionPopupPayload.getAttribute('data-day-key') : '';
+                if (completionPopupMessage) {
+                    const popupStorageKey = `daily_completion_popup_${completionPopupDayKey}`;
+                    if (!sessionStorage.getItem(popupStorageKey)) {
+                        const popup = document.getElementById('daily-completion-popup');
+                        const popupText = document.getElementById('daily-completion-popup-text');
+                        if (popup && popupText) {
+                            popupText.textContent = completionPopupMessage;
+                            popup.classList.add('show');
+                            sessionStorage.setItem(popupStorageKey, 'shown');
+                        }
+                    }
+                }
             });
         </script>
+
+        <div id="daily-completion-payload" data-message="{{ completion_popup_message or '' }}" data-day-key="{{ selected_day_key }}" hidden></div>
+
+        <div id="daily-completion-popup" class="daily-completion-popup" aria-hidden="true">
+            <div class="daily-completion-card">
+                <p id="daily-completion-popup-text" class="daily-completion-text"></p>
+                <button type="button" class="daily-completion-close" onclick="closeDailyCompletionPopup()">Luk</button>
+            </div>
+        </div>
+
+        <div class="mode-status-panel">
+            {% if is_staff %}
+            <a class="mode-switch-btn" href="/staff-logout">Gå til livredder version</a>
+            {% else %}
+            <a class="mode-switch-btn" href="/staff-login">Gå til kontor version</a>
+            {% endif %}
+        </div>
+
+        {% if is_staff %}
         <input type="checkbox" id="menu-toggle" class="menu-toggle">
         <label for="menu-toggle" class="hamburger-icon">
             <span></span>
@@ -569,9 +691,12 @@
             <a class="side-menu-link" href="/add-task">Tilføj opgave</a>
             <a class="side-menu-link" href="/edit-task">Rediger opgave</a>
             <a class="side-menu-link" href="/employees">Rediger initialliste</a>
-            <a class="side-menu-link" href="/kontor-oplysninger">Kontor oplysninger</a>
             <a class="side-menu-link" href="/guide">Guide</a>
+            <a class="side-menu-link" href="/staff/completed-tasks">Overblik over udførte opgaver</a>
         </div>
+        {% else %}
+        <a class="guide-floating-btn" href="/guide">Guide</a>
+        {% endif %}
 
         <div class="week-header">
             <a class = "left-arrow" href="/?week={{week-1}}&day={{day}}">&lt; </a>
@@ -683,7 +808,58 @@
             {% for task in tasks %}
                 {% if task.weekday == day and task.time_of_day == "midday" %}
                 <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
-                        <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
+                        <input type="checkbox" class="tick-checkbox" id="initial-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
+                        <label class="initial-label" for="initial-{{task.id}}"></label>
+
+                        <span class="initial-box">
+                            <div class="initial-header">
+                            <p>Vælg dine initialer</p>
+                            <hr style="margin: 10px 0;">
+                            <form method="POST" action="/add-employee" id="employee-form-{{task.id}}" onsubmit="handleAddEmployee(event, '{{task.id}}')">
+                                <div class="initial-input-row">
+                                <input type="text" name="initials" id="initials-input-{{task.id}}" placeholder="Nyt Initial">
+                                <button type="submit">Tilføj</button>
+                                </div>
+                                <input type="hidden" name="task_id" value="{{task.id}}">
+                            </form>
+                            </div>
+
+                            {% if used_today_employees %}
+                            <div class="used-today-box">
+                                <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 12px;">Brugt i dag</p>
+                                <div class="used-today-row">
+                                    {% for employee in used_today_employees %}
+                                    <button type="button" class="employee-btn employee-used-today" data-task-id="{{task.id}}" data-employee-id="{{employee.id}}">
+                                        {{employee.name}}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <hr style="margin: 8px 0;">
+                            </div>
+                            {% endif %}
+
+                            {% if show_unknown_button %}
+                            <div class="used-today-box">
+                                <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 12px;">Sidste time før luk</p>
+                                <div class="used-today-row">
+                                    <button type="button" class="employee-btn employee-unknown unknown-task-btn" data-task-id="{{task.id}}">Ukendt initial</button>
+                                </div>
+                                <hr style="margin: 8px 0;">
+                            </div>
+                            {% endif %}
+
+                            <div class="employee-list" id="employee-list-{{task.id}}">
+                                {% for letter, employees in employees_by_letter.items()|sort %}
+                                <div class="employee-letter-group">
+                                    {% for employee in employees %}
+                                    <button type="button" class="employee-btn" data-task-id="{{task.id}}" data-employee-id="{{employee.id}}">
+                                        {{employee.name}}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </span>
                         <div class="task-card">
                     <p>{{ task.title }} 
                         <span class="complete-task-before">
@@ -712,7 +888,58 @@
             {% for task in tasks %}
                 {% if task.weekday == day and task.time_of_day == "night" %}
                 <div class="task-row {% if not day_is_today %}locked-task{% endif %}">
-                        <input type="checkbox" class="tick-checkbox" {% if not day_is_today %}disabled{% endif %}>
+                        <input type="checkbox" class="tick-checkbox" id="initial-{{task.id}}" {% if not day_is_today %}disabled{% endif %}>
+                        <label class="initial-label" for="initial-{{task.id}}"></label>
+
+                        <span class="initial-box">
+                            <div class="initial-header">
+                            <p>Vælg dine initialer</p>
+                            <hr style="margin: 10px 0;">
+                            <form method="POST" action="/add-employee" id="employee-form-{{task.id}}" onsubmit="handleAddEmployee(event, '{{task.id}}')">
+                                <div class="initial-input-row">
+                                <input type="text" name="initials" id="initials-input-{{task.id}}" placeholder="Nyt Initial">
+                                <button type="submit">Tilføj</button>
+                                </div>
+                                <input type="hidden" name="task_id" value="{{task.id}}">
+                            </form>
+                            </div>
+
+                            {% if used_today_employees %}
+                            <div class="used-today-box">
+                                <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 12px;">Brugt i dag</p>
+                                <div class="used-today-row">
+                                    {% for employee in used_today_employees %}
+                                    <button type="button" class="employee-btn employee-used-today" data-task-id="{{task.id}}" data-employee-id="{{employee.id}}">
+                                        {{employee.name}}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <hr style="margin: 8px 0;">
+                            </div>
+                            {% endif %}
+
+                            {% if show_unknown_button %}
+                            <div class="used-today-box">
+                                <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 12px;">Sidste time før luk</p>
+                                <div class="used-today-row">
+                                    <button type="button" class="employee-btn employee-unknown unknown-task-btn" data-task-id="{{task.id}}">Ukendt initial</button>
+                                </div>
+                                <hr style="margin: 8px 0;">
+                            </div>
+                            {% endif %}
+
+                            <div class="employee-list" id="employee-list-{{task.id}}">
+                                {% for letter, employees in employees_by_letter.items()|sort %}
+                                <div class="employee-letter-group">
+                                    {% for employee in employees %}
+                                    <button type="button" class="employee-btn" data-task-id="{{task.id}}" data-employee-id="{{employee.id}}">
+                                        {{employee.name}}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </span>
                         <div class="task-card">
                     <p>{{ task.title }} 
                         <span class="complete-task-before">

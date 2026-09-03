@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Kontor login</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background: #f3f7fb;
+        }
+
+        .card {
+            width: min(360px, 92vw);
+            background: white;
+            border: 1px solid #d8e3ee;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #c7d2de;
+            border-radius: 8px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            border: 1px solid #7fb7e8;
+            border-radius: 8px;
+            background: #cfe8ff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 12px;
+            text-decoration: none;
+            color: #334155;
+        }
+
+        .error {
+            color: #b00020;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <form class="card" method="POST" action="/staff-login">
+        <h1>Kontor login</h1>
+        <label for="code">Kode</label>
+        <input id="code" type="password" name="code" placeholder="Indtast kode" required>
+        <button type="submit">Log ind</button>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <a class="back" href="/">← Tilbage til forsiden</a>
+    </form>
+</body>
+</html>
